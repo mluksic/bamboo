@@ -101,9 +101,3 @@ func fetchWorkingHours() ([]TimeEntry, error) {
 
 	return workingHours, nil
 }
-
-//bamboo add --day 2024-01-01 --token asdf
-//- create time entry 9:10 - 11:25, 11:25 - 11:52, 11:52 - 17:12
-//
-//bamboo get --month 2024-10
-//- get time entries for specific month by date + working hoursapiKey, employeeId, startDate, endDate
