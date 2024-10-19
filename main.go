@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 )
 
@@ -38,7 +40,28 @@ func main() {
 		fmt.Println("Invalid 'end' date filter provided. Aborting")
 		os.Exit(1)
 	}
-	fmt.Printf(getHoursUrlTemplate, apiKey, employeeId, startDate, endDate)
+
+	url := fmt.Sprintf(getHoursUrlTemplate, apiKey, employeeId, startDate, endDate)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Failed to get tracked working hours from Bamboo: %v \n", err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		fmt.Println("Invalid 'apiToken' provided - API returned 401 (Unauthorized). Aborting")
+		os.Exit(1)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Failed to read response body: %v", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(len(body), string(body))
 }
 
 //bamboo add --day 2024-01-01 --token asdf
