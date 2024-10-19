@@ -34,6 +34,10 @@ type TimeEntry struct {
 	Approved    bool
 }
 
+type DayReport struct {
+	workHours float64
+}
+
 func main() {
 	flag.StringVar(&apiKey, "apiKey", "", "Your BambooHR api key for API access")
 	flag.IntVar(&employeeId, "employeeId", 0, "Your BambooHr employee ID")
@@ -65,15 +69,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	totalHours := 0.0
+	dateMap := make(map[string]DayReport)
 	for _, entry := range workingHours {
-		totalHours = entry.Hours + totalHours
+		dayReport, ok := dateMap[entry.Date]
+		fmt.Println(entry.Hours)
+		if !ok {
+			dateMap[entry.Date] = DayReport{workHours: entry.Hours}
+			continue
+		} else {
+			dayReport.workHours += entry.Hours
+			dateMap[entry.Date] = dayReport
+		}
 	}
+
+	for date, report := range dateMap {
+		fmt.Printf("%s: %.2f hours \n", date, report.workHours)
+	}
+
+	totalHours := calculateWorkingHours(dateMap)
 	fmt.Printf("Your total working hours: %.2f hours \n", totalHours)
 }
 
 func fetchWorkingHours() ([]TimeEntry, error) {
-	var workingHours TimeEntries
 	var getHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/timesheet_entries?employeeIds=%d&start=%s&end=%s"
 	url := fmt.Sprintf(getHoursUrlTemplate, apiKey, employeeId, startDate, endDate)
 
@@ -94,10 +111,21 @@ func fetchWorkingHours() ([]TimeEntry, error) {
 		return nil, errors.New(string(body))
 	}
 
+	var workingHours TimeEntries
 	err = json.Unmarshal(body, &workingHours)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to unmarshal json to struct: %v", err))
 	}
 
 	return workingHours, nil
+}
+
+func calculateWorkingHours(dates map[string]DayReport) float64 {
+	totalHours := 0.0
+
+	for _, date := range dates {
+		totalHours = date.workHours + totalHours
+	}
+
+	return totalHours
 }
