@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,6 +16,23 @@ var (
 	endDate    string
 	employeeId int
 )
+
+type TimeEntries []TimeEntry
+
+type TimeEntry struct {
+	Id          int
+	EmployeeId  int
+	Type        string
+	Date        string
+	Start       string
+	End         string
+	Timezone    string
+	Hours       float64
+	Note        string
+	ProjectInfo string
+	ApprovedAt  string
+	Approved    bool
+}
 
 func main() {
 	flag.StringVar(&apiKey, "apiKey", "", "Your BambooHR api key for API access")
@@ -46,10 +64,16 @@ func main() {
 		fmt.Printf("Failed fetching working hours: %v \n", err)
 		os.Exit(1)
 	}
-	fmt.Println(string(workingHours))
+
+	totalHours := 0.0
+	for _, entry := range workingHours {
+		totalHours = entry.Hours + totalHours
+	}
+	fmt.Printf("Your total working hours: %.2f hours \n", totalHours)
 }
 
-func fetchWorkingHours() ([]byte, error) {
+func fetchWorkingHours() ([]TimeEntry, error) {
+	var workingHours TimeEntries
 	var getHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/timesheet_entries?employeeIds=%d&start=%s&end=%s"
 	url := fmt.Sprintf(getHoursUrlTemplate, apiKey, employeeId, startDate, endDate)
 
@@ -70,7 +94,12 @@ func fetchWorkingHours() ([]byte, error) {
 		return nil, errors.New(string(body))
 	}
 
-	return body, nil
+	err = json.Unmarshal(body, &workingHours)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to unmarshal json to struct: %v", err))
+	}
+
+	return workingHours, nil
 }
 
 //bamboo add --day 2024-01-01 --token asdf
