@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -8,7 +9,6 @@ import (
 	"os"
 )
 
-var getHoursUrlTemplate string = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/timesheet_entries?employeeIds=%d&start=%s&end=%s"
 var (
 	apiKey     string
 	startDate  string
@@ -41,27 +41,36 @@ func main() {
 		os.Exit(1)
 	}
 
+	workingHours, err := fetchWorkingHours()
+	if err != nil {
+		fmt.Printf("Failed fetching working hours: %v \n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(workingHours))
+}
+
+func fetchWorkingHours() ([]byte, error) {
+	var getHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/timesheet_entries?employeeIds=%d&start=%s&end=%s"
 	url := fmt.Sprintf(getHoursUrlTemplate, apiKey, employeeId, startDate, endDate)
 
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("Failed to get tracked working hours from Bamboo: %v \n", err)
-		os.Exit(1)
+		return nil, errors.New(fmt.Sprintf("failed to get tracked working hours from Bamboo: %v \n", err))
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		fmt.Println("Invalid 'apiToken' provided - API returned 401 (Unauthorized). Aborting")
-		os.Exit(1)
-	}
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("Failed to read response body: %v", err)
-		os.Exit(1)
+		return nil, errors.New(fmt.Sprintf("failed to read response body: %v", err))
+	}
+	if resp.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New("invalid 'apiToken' provided - API returned 401 (Unauthorized). Aborting")
+	}
+	if resp.StatusCode == http.StatusBadRequest {
+		return nil, errors.New(string(body))
 	}
 
-	fmt.Println(len(body), string(body))
+	return body, nil
 }
 
 //bamboo add --day 2024-01-01 --token asdf
