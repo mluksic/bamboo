@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
 )
@@ -83,11 +84,11 @@ func main() {
 	}
 
 	for date, report := range dateMap {
-		fmt.Printf("%s: %.2f hours \n", date, report.workHours)
+		fmt.Printf("%s: %s\n", date, convertDecimalTimeToTime(report.workHours))
 	}
 
 	totalHours := calculateWorkingHours(dateMap)
-	fmt.Printf("Your total working hours: %.2f hours \n", totalHours)
+	fmt.Printf("Your total working hours: %s \n", convertDecimalTimeToTime(totalHours))
 }
 
 func fetchWorkingHours() ([]TimeEntry, error) {
@@ -128,4 +129,11 @@ func calculateWorkingHours(dates map[string]DayReport) float64 {
 	}
 
 	return totalHours
+}
+
+func convertDecimalTimeToTime(decimalTime float64) string {
+	hours := int(decimalTime)
+	minutes := int(math.Round((decimalTime - float64(hours)) * 60))
+
+	return fmt.Sprintf("%d hours and %d minutes", hours, minutes)
 }
