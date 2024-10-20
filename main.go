@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"text/tabwriter"
 )
 
 var (
@@ -73,7 +74,6 @@ func main() {
 	dateMap := make(map[string]DayReport)
 	for _, entry := range workingHours {
 		dayReport, ok := dateMap[entry.Date]
-		fmt.Println(entry.Hours)
 		if !ok {
 			dateMap[entry.Date] = DayReport{workHours: entry.Hours}
 			continue
@@ -83,12 +83,14 @@ func main() {
 		}
 	}
 
+	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
+	fmt.Fprintf(w, "Date\tTotal\t\n")
 	for date, report := range dateMap {
-		fmt.Printf("%s: %s\n", date, convertDecimalTimeToTime(report.workHours))
+		fmt.Fprintf(w, "%s\t%s\n", date, convertDecimalTimeToTime(report.workHours))
 	}
 
 	totalHours := calculateWorkingHours(dateMap)
-	fmt.Printf("Your total working hours: %s \n", convertDecimalTimeToTime(totalHours))
+	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(totalHours))
 }
 
 func fetchWorkingHours() ([]TimeEntry, error) {
