@@ -36,6 +36,11 @@ type TimeEntry struct {
 	Approved    bool
 }
 
+type Report struct {
+	days           map[string]DayReport
+	totalWorkHours float64
+}
+
 type DayReport struct {
 	workHours float64
 }
@@ -70,29 +75,16 @@ func main() {
 		fmt.Printf("Failed fetching working hours: %v \n", err)
 		os.Exit(1)
 	}
-
-	dateMap := make(map[string]DayReport)
-	totalHours := 0.0
-
-	for _, entry := range workingHours {
-		dayReport, ok := dateMap[entry.Date]
-		if !ok {
-			dateMap[entry.Date] = DayReport{workHours: entry.Hours}
-			totalHours += entry.Hours
-			continue
-		}
-		dayReport.workHours += entry.Hours
-		dateMap[entry.Date] = dayReport
-		totalHours += entry.Hours
-	}
+	report := groupHoursByDate(workingHours)
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
+	// table header
 	fmt.Fprintf(w, "Date\tTotal\t\n")
-	for date, report := range dateMap {
+	for date, report := range report.days {
 		fmt.Fprintf(w, "%s\t%s\n", date, convertDecimalTimeToTime(report.workHours))
 	}
 
-	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(totalHours))
+	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
 }
 
 func fetchWorkingHours() ([]TimeEntry, error) {
@@ -123,6 +115,28 @@ func fetchWorkingHours() ([]TimeEntry, error) {
 	}
 
 	return workingHours, nil
+}
+
+func groupHoursByDate(workingHours []TimeEntry) Report {
+	dateMap := make(map[string]DayReport)
+	totalHours := 0.0
+
+	for _, entry := range workingHours {
+		dayReport, ok := dateMap[entry.Date]
+		if !ok {
+			dateMap[entry.Date] = DayReport{workHours: entry.Hours}
+			totalHours += entry.Hours
+			continue
+		}
+		dayReport.workHours += entry.Hours
+		dateMap[entry.Date] = dayReport
+		totalHours += entry.Hours
+	}
+
+	return Report{
+		dateMap,
+		totalHours,
+	}
 }
 
 func convertDecimalTimeToTime(decimalTime float64) string {
