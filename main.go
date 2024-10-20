@@ -41,8 +41,8 @@ type DayReport struct {
 }
 
 func main() {
-	flag.StringVar(&apiKey, "apiKey", "", "Your BambooHR api key for API access")
-	flag.IntVar(&employeeId, "employeeId", 0, "Your BambooHr employee ID")
+	flag.StringVar(&apiKey, "apiKey", "", "Your BambooHR API key")
+	flag.IntVar(&employeeId, "employeeId", 0, "Your BambooHR employee ID")
 	flag.StringVar(&startDate, "start", "", "Start date filter for tracked working hours")
 	flag.StringVar(&endDate, "end", "", "End date filter for tracked working hours")
 
