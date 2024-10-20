@@ -72,15 +72,18 @@ func main() {
 	}
 
 	dateMap := make(map[string]DayReport)
+	totalHours := 0.0
+
 	for _, entry := range workingHours {
 		dayReport, ok := dateMap[entry.Date]
 		if !ok {
 			dateMap[entry.Date] = DayReport{workHours: entry.Hours}
+			totalHours += entry.Hours
 			continue
-		} else {
-			dayReport.workHours += entry.Hours
-			dateMap[entry.Date] = dayReport
 		}
+		dayReport.workHours += entry.Hours
+		dateMap[entry.Date] = dayReport
+		totalHours += entry.Hours
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
@@ -89,7 +92,6 @@ func main() {
 		fmt.Fprintf(w, "%s\t%s\n", date, convertDecimalTimeToTime(report.workHours))
 	}
 
-	totalHours := calculateWorkingHours(dateMap)
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(totalHours))
 }
 
@@ -121,16 +123,6 @@ func fetchWorkingHours() ([]TimeEntry, error) {
 	}
 
 	return workingHours, nil
-}
-
-func calculateWorkingHours(dates map[string]DayReport) float64 {
-	totalHours := 0.0
-
-	for _, date := range dates {
-		totalHours = date.workHours + totalHours
-	}
-
-	return totalHours
 }
 
 func convertDecimalTimeToTime(decimalTime float64) string {
