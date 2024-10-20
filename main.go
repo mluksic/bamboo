@@ -42,19 +42,20 @@ type Entry struct {
 }
 
 type TimeEntries []TimeEntry
+
 type TimeEntry struct {
-	Id          int
-	EmployeeId  int
-	Type        string
-	Date        string
-	Start       string
-	End         string
-	Timezone    string
-	Hours       float64
-	Note        string
-	ProjectInfo string
-	ApprovedAt  string
-	Approved    bool
+	Id          int         `json:"id"`
+	EmployeeId  int         `json:"employeeId"`
+	Type        string      `json:"type"`
+	Date        string      `json:"date"`
+	Start       time.Time   `json:"start"`
+	End         time.Time   `json:"end"`
+	Timezone    string      `json:"timezone"`
+	Hours       float64     `json:"hours"`
+	Note        interface{} `json:"note"`
+	ProjectInfo interface{} `json:"projectInfo"`
+	ApprovedAt  time.Time   `json:"approvedAt"`
+	Approved    bool        `json:"approved"`
 }
 
 type Report struct {
