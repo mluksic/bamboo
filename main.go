@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 )
 
 var (
@@ -102,9 +103,14 @@ func processList() {
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
 	// table header
-	fmt.Fprintf(w, "Date\tTotal\t\n")
+	fmt.Fprintf(w, "Date\tWeekday\tTotal\t\n")
 	for date, report := range report.days {
-		fmt.Fprintf(w, "%s\t%s\n", date, convertDecimalTimeToTime(report.workHours))
+		t, err := time.Parse("2006-01-02", date)
+		if err != nil {
+			fmt.Printf("Unable to parse date from string: %v \n", err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\n", date, t.Weekday(), convertDecimalTimeToTime(report.workHours))
 	}
 
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
