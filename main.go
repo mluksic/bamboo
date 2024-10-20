@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -19,8 +20,14 @@ var (
 	employeeId int
 )
 
-type TimeEntries []TimeEntry
+const (
+	ActionList = "list"
+	ActionAdd  = "add"
+)
 
+var actions = []string{ActionAdd, ActionList}
+
+type TimeEntries []TimeEntry
 type TimeEntry struct {
 	Id          int
 	EmployeeId  int
@@ -40,19 +47,20 @@ type Report struct {
 	days           map[string]DayReport
 	totalWorkHours float64
 }
-
 type DayReport struct {
 	workHours float64
 }
 
-func main() {
+func init() {
 	flag.StringVar(&apiKey, "apiKey", "", "Your BambooHR API key")
 	flag.IntVar(&employeeId, "employeeId", 0, "Your BambooHR employee ID")
 	flag.StringVar(&startDate, "start", "", "Start date filter for tracked working hours")
 	flag.StringVar(&endDate, "end", "", "End date filter for tracked working hours")
 
 	flag.Parse()
+}
 
+func main() {
 	if apiKey == "" {
 		fmt.Println("Invalid 'apiKey' provided. Aborting")
 		os.Exit(1)
@@ -70,6 +78,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	action := flag.Arg(0)
+	switch action {
+	case ActionList:
+		processList()
+		os.Exit(0)
+	case ActionAdd:
+		fmt.Println("selected add")
+		os.Exit(0)
+	default:
+		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
+		os.Exit(1)
+	}
+}
+
+func processList() {
 	workingHours, err := fetchWorkingHours()
 	if err != nil {
 		fmt.Printf("Failed fetching working hours: %v \n", err)
