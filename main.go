@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -9,6 +10,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -28,6 +30,16 @@ const (
 )
 
 var actions = []string{ActionAdd, ActionList}
+
+type TimeEntriesPostBody struct {
+	Entries []Entry `json:"entries"`
+}
+type Entry struct {
+	EmployeeId int    `json:"employeeId"`
+	Date       string `json:"date"`
+	Start      string `json:"start"`
+	End        string `json:"end"`
+}
 
 type TimeEntries []TimeEntry
 type TimeEntry struct {
@@ -86,7 +98,7 @@ func main() {
 		processList()
 		os.Exit(0)
 	case ActionAdd:
-		fmt.Println("selected add")
+		addWorkingHours()
 		os.Exit(0)
 	default:
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
@@ -123,6 +135,100 @@ func processList() {
 	}
 
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
+}
+
+func addWorkingHours() {
+	var storeHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/clock_entries/store"
+	url := fmt.Sprintf(storeHoursUrlTemplate, apiKey)
+
+	entries, err := preparePost()
+	if err != nil {
+		fmt.Printf("Unable to create post request entries: %v", err)
+		os.Exit(1)
+	}
+
+	body, _ := json.Marshal(TimeEntriesPostBody{Entries: entries})
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	if err != nil {
+		fmt.Printf("Unable to create POST request: %v \n", err)
+		os.Exit(1)
+	}
+	req.Header.Add("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("Unable to trigger POST request: %v \n", err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("Unable to read response body: %v", err)
+		os.Exit(1)
+	}
+	if resp.StatusCode == http.StatusUnauthorized {
+		fmt.Printf("invalid 'apiToken' provided - API returned 401 (Unauthorized). Aborting \n")
+		os.Exit(1)
+	}
+	if resp.StatusCode == http.StatusBadRequest {
+		fmt.Printf("Received Bad request (400): %s \n", string(respBody))
+		os.Exit(1)
+	}
+
+	fmt.Println("Successfully populated working hour entries between two dates")
+}
+
+func preparePost() ([]Entry, error) {
+	start, err := time.Parse("2006-01-02", startDate)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to parse start date: %v \n", err))
+	}
+	end, err := time.Parse("2006-01-02", endDate)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to parse start date: %v \n", err))
+	}
+	// stop if diff between start and end date is more than 31 days
+	if end.Sub(start).Hours() > 31*24 {
+		return nil, errors.New(fmt.Sprint("max diff between days is 31 days \n", err))
+	}
+
+	weekend := []time.Weekday{time.Saturday, time.Sunday}
+	var entries []Entry
+
+	for s := start; !s.After(end); s = s.AddDate(0, 0, 1) {
+		// exclude end date
+		if s == end {
+			break
+		}
+		// exclude weekends
+		if slices.Contains(weekend, s.Weekday()) {
+			continue
+		}
+		startEntry := Entry{
+			EmployeeId: employeeId,
+			Start:      "9:05",
+			End:        "11:25",
+			Date:       s.Format("2006-01-02"),
+		}
+		lunchEntry := Entry{
+			EmployeeId: employeeId,
+			Start:      "11:25",
+			End:        "11:56",
+			Date:       s.Format("2006-01-02"),
+		}
+		endEntry := Entry{
+			EmployeeId: employeeId,
+			Start:      "11:56",
+			End:        "17:05",
+			Date:       s.Format("2006-01-02"),
+		}
+
+		entries = append(entries, startEntry, lunchEntry, endEntry)
+		fmt.Println(entries)
+	}
+
+	return entries, nil
 }
 
 func fetchWorkingHours() ([]TimeEntry, error) {
