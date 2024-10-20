@@ -9,6 +9,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -104,13 +105,21 @@ func processList() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
 	// table header
 	fmt.Fprintf(w, "Date\tWeekday\tTotal\t\n")
-	for date, report := range report.days {
+
+	// sort dates in asc order because map sorting order is random
+	dates := make([]string, 0, len(report.days))
+	for date := range report.days {
+		dates = append(dates, date)
+	}
+	sort.Strings(dates)
+
+	for _, date := range dates {
 		t, err := time.Parse("2006-01-02", date)
 		if err != nil {
 			fmt.Printf("Unable to parse date from string: %v \n", err)
 			os.Exit(1)
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\n", date, t.Weekday(), convertDecimalTimeToTime(report.workHours))
+		fmt.Fprintf(w, "%s\t%s\t%s\n", date, t.Weekday(), convertDecimalTimeToTime(report.days[date].workHours))
 	}
 
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
