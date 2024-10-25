@@ -92,14 +92,35 @@ func main() {
 		fmt.Println("Invalid 'end' date filter provided. Aborting")
 		os.Exit(1)
 	}
+	start, err := time.Parse("2006-01-02", startDate)
+	if err != nil {
+		fmt.Println("Unable to parse 'start' date. Aborting")
+		os.Exit(1)
+	}
+	end, err := time.Parse("2006-01-02", endDate)
+	if err != nil {
+		fmt.Println("Unable to parse 'end' date. Aborting")
+		os.Exit(1)
+	}
+	if start.After(end) {
+		fmt.Println("'end' date cannot be before 'start' date")
+		os.Exit(1)
+	}
+
+	workingHours, err := fetchWorkingHours()
+	if err != nil {
+		fmt.Printf("Failed fetching working hours: %v \n", err)
+		os.Exit(1)
+	}
 
 	action := flag.Arg(0)
+
 	switch action {
 	case ActionList:
-		processList()
+		processList(workingHours)
 		os.Exit(0)
 	case ActionAdd:
-		addWorkingHours()
+		addWorkingHours(workingHours)
 		os.Exit(0)
 	default:
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
@@ -107,12 +128,7 @@ func main() {
 	}
 }
 
-func processList() {
-	workingHours, err := fetchWorkingHours()
-	if err != nil {
-		fmt.Printf("Failed fetching working hours: %v \n", err)
-		os.Exit(1)
-	}
+func processList(workingHours []TimeEntry) {
 	report := groupHoursByDate(workingHours)
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
@@ -138,7 +154,7 @@ func processList() {
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
 }
 
-func addWorkingHours() {
+func addWorkingHours(workingHours []TimeEntry) {
 	var storeHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/clock_entries/store"
 	url := fmt.Sprintf(storeHoursUrlTemplate, apiKey)
 
