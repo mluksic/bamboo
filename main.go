@@ -115,12 +115,14 @@ func main() {
 
 	action := flag.Arg(0)
 
+	report := groupHoursByDate(workingHours)
+
 	switch action {
 	case ActionList:
-		processList(workingHours)
+		processList(report)
 		os.Exit(0)
 	case ActionAdd:
-		addWorkingHours(workingHours)
+		addWorkingHours(report)
 		os.Exit(0)
 	default:
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
@@ -128,9 +130,7 @@ func main() {
 	}
 }
 
-func processList(workingHours []TimeEntry) {
-	report := groupHoursByDate(workingHours)
-
+func processList(report Report) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
 	// table header
 	fmt.Fprintf(w, "Date\tWeekday\tTotal\t\n")
@@ -154,11 +154,11 @@ func processList(workingHours []TimeEntry) {
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
 }
 
-func addWorkingHours(workingHours []TimeEntry) {
+func addWorkingHours(report Report) {
 	var storeHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/clock_entries/store"
 	url := fmt.Sprintf(storeHoursUrlTemplate, apiKey)
 
-	entries, err := preparePost()
+	entries, err := preparePost(report)
 	if err != nil {
 		fmt.Printf("Unable to create post request entries: %v", err)
 		os.Exit(1)
@@ -196,7 +196,7 @@ func addWorkingHours(workingHours []TimeEntry) {
 	fmt.Println("Successfully populated working hour entries between two dates")
 }
 
-func preparePost() ([]Entry, error) {
+func preparePost(report Report) ([]Entry, error) {
 	start, err := time.Parse("2006-01-02", startDate)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to parse start date: %v \n", err))
@@ -211,6 +211,7 @@ func preparePost() ([]Entry, error) {
 	}
 
 	weekend := []time.Weekday{time.Saturday, time.Sunday}
+	existingHours := report.days
 	var entries []Entry
 
 	for s := start; !s.After(end); s = s.AddDate(0, 0, 1) {
@@ -222,6 +223,13 @@ func preparePost() ([]Entry, error) {
 		if slices.Contains(weekend, s.Weekday()) {
 			continue
 		}
+		// exclude days when hours were already logged
+		_, ok := existingHours[s.Format("2006-01-02")]
+		if ok {
+			fmt.Printf("excluded already added date %v \n", s.Format("2006-01-02"))
+			continue
+		}
+
 		startEntry := Entry{
 			EmployeeId: employeeId,
 			Start:      "9:05",
@@ -242,7 +250,6 @@ func preparePost() ([]Entry, error) {
 		}
 
 		entries = append(entries, startEntry, lunchEntry, endEntry)
-		fmt.Println(entries)
 	}
 
 	return entries, nil
