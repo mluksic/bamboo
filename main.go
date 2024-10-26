@@ -226,7 +226,6 @@ func preparePost(report Report) ([]Entry, error) {
 		// exclude days when hours were already logged
 		_, ok := existingHours[s.Format("2006-01-02")]
 		if ok {
-			fmt.Printf("excluded already added date %v \n", s.Format("2006-01-02"))
 			continue
 		}
 
