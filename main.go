@@ -223,11 +223,13 @@ func generateWorkEntries(report Report) ([]Entry, error) {
 		}
 		// exclude weekends
 		if slices.Contains(weekend, s.Weekday()) {
+			fmt.Printf("Excluded %s because it's a weekend \n", s.Format("2006-01-2"))
 			continue
 		}
 		// exclude days when hours were already logged
 		_, ok := existingHours[s.Format("2006-01-02")]
 		if ok {
+			fmt.Printf("Excluded %s because hours were already logged for this day \n", s.Format("2006-01-2"))
 			continue
 		}
 
