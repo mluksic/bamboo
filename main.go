@@ -231,8 +231,8 @@ func generateWorkEntries(report Report) ([]Entry, error) {
 			continue
 		}
 
-		// 470 to 490 minutes (7h50 to 8h10min)
-		workMinutes := r.Intn(21) + 470
+		// 440 to 460 minutes (7h20 to 7h40) - excluding 30min for break
+		workMinutes := r.Intn(21) + 440
 		// randomly select either 8 or 8 as the hour, and random minute within the hour (8AM - 9:59AM)
 		morningStart := time.Date(s.Year(), s.Month(), s.Day(), r.Intn(2)+8, r.Intn(60), 0, 0, s.Location())
 		// calculate the halfway of the work duration
