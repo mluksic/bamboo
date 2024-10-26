@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/rand"
 	"net/http"
 	"os"
 	"slices"
@@ -158,7 +159,7 @@ func addWorkingHours(report Report) {
 	var storeHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/clock_entries/store"
 	url := fmt.Sprintf(storeHoursUrlTemplate, apiKey)
 
-	entries, err := preparePost(report)
+	entries, err := generateWorkEntries(report)
 	if err != nil {
 		fmt.Printf("Unable to create post request entries: %v", err)
 		os.Exit(1)
@@ -196,7 +197,7 @@ func addWorkingHours(report Report) {
 	fmt.Println("Successfully populated working hour entries between two dates")
 }
 
-func preparePost(report Report) ([]Entry, error) {
+func generateWorkEntries(report Report) ([]Entry, error) {
 	start, err := time.Parse("2006-01-02", startDate)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to parse start date: %v \n", err))
@@ -213,6 +214,7 @@ func preparePost(report Report) ([]Entry, error) {
 	weekend := []time.Weekday{time.Saturday, time.Sunday}
 	existingHours := report.days
 	var entries []Entry
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	for s := start; !s.After(end); s = s.AddDate(0, 0, 1) {
 		// exclude end date
@@ -229,23 +231,36 @@ func preparePost(report Report) ([]Entry, error) {
 			continue
 		}
 
+		// 470 to 490 minutes (7h50 to 8h10min)
+		workMinutes := r.Intn(21) + 470
+		// randomly select either 8 or 8 as the hour, and random minute within the hour (8AM - 9:59AM)
+		morningStart := time.Date(s.Year(), s.Month(), s.Day(), r.Intn(2)+8, r.Intn(60), 0, 0, s.Location())
+		// calculate the halfway of the work duration
+		morningEnd := morningStart.Add(time.Duration(workMinutes/2) * time.Minute)
+		breakStart := morningEnd
+		// 30min lunch break
+		breakEnd := breakStart.Add(30 * time.Minute)
+		afternoonEnd := breakEnd.Add(time.Duration(workMinutes-workMinutes/2) * time.Minute)
+
 		startEntry := Entry{
 			EmployeeId: employeeId,
-			Start:      "9:05",
-			End:        "11:25",
 			Date:       s.Format("2006-01-02"),
+			Start:      morningStart.Format("15:04"),
+			End:        morningEnd.Format("15:04"),
 		}
+
 		lunchEntry := Entry{
 			EmployeeId: employeeId,
-			Start:      "11:25",
-			End:        "11:56",
 			Date:       s.Format("2006-01-02"),
+			Start:      breakStart.Format("15:04"),
+			End:        breakEnd.Format("15:04"),
 		}
+
 		endEntry := Entry{
 			EmployeeId: employeeId,
-			Start:      "11:56",
-			End:        "17:05",
 			Date:       s.Format("2006-01-02"),
+			Start:      breakEnd.Format("15:04"),
+			End:        afternoonEnd.Format("15:04"),
 		}
 
 		entries = append(entries, startEntry, lunchEntry, endEntry)
