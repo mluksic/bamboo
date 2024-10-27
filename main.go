@@ -21,11 +21,13 @@ import (
 )
 
 var (
-	apiKey     string
-	startDate  string
-	endDate    string
-	employeeId int
-	holidays   map[string]string
+	apiKey       string
+	startDate    string
+	endDate      string
+	excludeDays  string
+	employeeId   int
+	holidays     map[string]string
+	excludedDays map[string]bool
 )
 
 const (
@@ -75,6 +77,7 @@ func init() {
 	flag.IntVar(&employeeId, "employeeId", 0, "Your BambooHR employee ID")
 	flag.StringVar(&startDate, "start", "", "Start date filter for tracked working hours")
 	flag.StringVar(&endDate, "end", "", "End date filter for tracked working hours")
+	flag.StringVar(&excludeDays, "excludeDays", "", "Comma-separated list of days (YYYY-MM-DD,YYYY-MM-DD) eg PTO, Collective Leave etc.")
 
 	flag.Parse()
 }
@@ -116,7 +119,7 @@ func main() {
 		fmt.Printf("Cannot load holidays: %v . Aborting \n", err)
 		os.Exit(2)
 	}
-
+	excludedDays = loadExcludedDays()
 	workingHours, err := fetchWorkingHours()
 	if err != nil {
 		fmt.Printf("Failed fetching working hours: %v \n", err)
@@ -138,6 +141,19 @@ func main() {
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
 		os.Exit(1)
 	}
+}
+
+func loadExcludedDays() map[string]bool {
+	excludedDays := make(map[string]bool)
+	if excludeDays == "" {
+		return excludedDays
+	}
+	dates := strings.Split(excludeDays, ",")
+	for _, date := range dates {
+		excludedDays[date] = true
+	}
+
+	return excludedDays
 }
 
 func loadHolidays() (map[string]string, error) {
@@ -288,6 +304,12 @@ func generateWorkEntries(report Report) ([]Entry, error) {
 		holiday, ok := holidays[s.Format("2006-01-02")]
 		if ok {
 			fmt.Printf("Excluded '%s' because it's public holiday - %s \n", s.Format("2006-01-2"), holiday)
+			continue
+		}
+		// exclude provided dates (PTOs, collective leave, etc.)
+		_, ok = excludedDays[s.Format("2006-01-02")]
+		if ok {
+			fmt.Printf("Excluded '%s' because you excluded it \n", s.Format("2006-01-2"))
 			continue
 		}
 
