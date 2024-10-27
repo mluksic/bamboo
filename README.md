@@ -9,10 +9,6 @@ CLI tool for automating the generation of daily work hour entries
 - Excludes weekends, public holidays, and specified PTO days.
 - Populates missing work entries on BambooHR
 
-## Dependencies
-
-- [Go](https://go.dev/doc/install)
-
 ## Prerequisites
 
 Download and install:
@@ -49,8 +45,8 @@ Generate work entries for October 2024, excluding October 28th, 29th and October
 $ go run . --apiKey myApiToken --employeeId 12345 --start 2024-10-01 --end 2024-11-01 --excludeDays 2024-10-28,2024-10-29,2024-10-30
 ```
 
-## Response
-```bash
+### Response
+```
 Excluded '2024-10-1' because hours were already logged for this day
 Excluded '2024-10-2' because hours were already logged for this day
 Excluded '2024-10-3' because hours were already logged for this day
@@ -71,5 +67,7 @@ Excluded '2024-10-30' because you excluded it
 Excluded '2024-10-31' because it's public holiday - dan reformacije
 Successfully populated working hour entries between two dates
 ```
+After running the `add` command, double-check work entries in your Bamboo account
 
+## Authors
 👤 [Miha Luksic](https://www.mihaluksic.com)
