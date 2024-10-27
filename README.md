@@ -13,20 +13,26 @@ CLI tool for automating the generation of daily work hour entries
 
 Download and install:
 
-- [Go](https://go.dev/doc/install)
+- [Go](https://go.dev/doc/install) (1.23+ recommended)
+
+
+## Configuration
+
+### Config File
+The application uses a configuration file, `config.json`, which stores default values for your Bamboo `apiToken` and `employeeId`
+```json
+{
+"apiToken": "yourBambooApiToken",
+"employeeId": 123
+}
+```
 
 ## Building the app
 
 ```bash
-$ go build -o bamboo
+$ go build -o bamboo main.go
 ```
 
-## Options
-- `--apiKey` (**Required**) API token for BambooHR authentication
-- `--employeeId`: (**Required**) Employee ID for whom the entries are generated - found in your BambooHR's URL
-- `--start`: (**Required**) Start date in YYYY-MM-DD format
-- `--end`: (**Required**) End date in YYYY-MM-DD format
-- `--excludeDays`: (__Optional__) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
 
 ## Running the app
 ### `list` command
@@ -38,6 +44,13 @@ $ go run . --apiKey myApiToken --employeeId yourEmployeeId  --start 2024-09-01 -
 ```bash
 $ go run . --apiKey myApiToken --employeeId yourEmployeeId  --start 2024-09-01 --end 2024-10-01 --excludeDays 2024-09-15,2024-09-20 add
 ```
+
+## Options
+- `--apiKey` (**Required**) API token for BambooHR authentication
+- `--employeeId`: (**Required**) Employee ID for whom the entries are generated - found in your BambooHR's URL
+- `--start`: (**Required**) Start date in YYYY-MM-DD format
+- `--end`: (**Required**) End date in YYYY-MM-DD format
+- `--excludeDays`: (__Optional__) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
 
 ## Example
 Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
@@ -67,6 +80,7 @@ Excluded '2024-10-30' because you excluded it
 Excluded '2024-10-31' because it's public holiday - dan reformacije
 Successfully populated working hour entries between two dates
 ```
+
 After running the `add` command, double-check work entries in your Bamboo account
 
 ## Authors
