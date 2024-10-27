@@ -53,14 +53,14 @@ $ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --en
 - `--excludeDays`: (__Optional__) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
 
 ## Example
-Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
+### Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
 
 (skip config params if they're stored in `config.json`)
 ```bash
-$ ./bamboo --apiKey yourBambooApiToken --employeeId  --start 2024-10-01 --end 2024-11-01 --excludeDays 2024-10-28,2024-10-29,2024-10-30
+$ ./bamboo --apiKey yourBambooApiToken --employeeId 123 --start 2024-10-01 --end 2024-11-01 --excludeDays 2024-10-28,2024-10-29,2024-10-30
 ```
 
-### Response
+#### Response
 ```
 Excluded '2024-10-1' because hours were already logged for this day
 Excluded '2024-10-2' because hours were already logged for this day
@@ -81,6 +81,39 @@ Excluded '2024-10-29' because you excluded it
 Excluded '2024-10-30' because you excluded it
 Excluded '2024-10-31' because it's public holiday - dan reformacije
 Successfully populated working hour entries between two dates
+```
+
+### Show work hours for September 2024, using `list` command
+
+(skip config params if they're stored in `config.json`)
+```bash
+$ ./bamboo --apiKey yourBambooApiToken --employeeId 123 --start 2024-09-01 --end 2024-10-01 list
+```
+
+#### Response
+```
+Date           Weekday       Total
+2024-09-02     Monday        8 hours and 14 minutes
+2024-09-03     Tuesday       8 hours and 10 minutes
+2024-09-04     Wednesday     8 hours and 18 minutes
+2024-09-05     Thursday      8 hours and 5 minutes
+2024-09-06     Friday        8 hours and 8 minutes
+2024-09-09     Monday        7 hours and 13 minutes
+2024-09-10     Tuesday       7 hours and 33 minutes
+2024-09-11     Wednesday     8 hours and 8 minutes
+2024-09-12     Thursday      7 hours and 44 minutes
+2024-09-16     Monday        8 hours and 10 minutes
+2024-09-17     Tuesday       8 hours and 1 minutes
+2024-09-19     Thursday      8 hours and 11 minutes
+2024-09-20     Friday        8 hours and 0 minutes
+2024-09-23     Monday        7 hours and 46 minutes
+2024-09-24     Tuesday       7 hours and 36 minutes
+2024-09-25     Wednesday     8 hours and 20 minutes
+2024-09-26     Thursday      7 hours and 56 minutes
+2024-09-27     Friday        4 hours and 50 minutes
+2024-09-30     Monday        7 hours and 30 minutes
+
+Your total working hours: 147 hours and 53 minutes
 ```
 
 After running the `add` command, double-check work entries in your Bamboo account
