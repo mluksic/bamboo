@@ -185,6 +185,12 @@ func loadHolidays() (map[string]string, error) {
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("unable to read row: %v \n", err))
 		}
+		// exclude 'working' public holidays
+		isDayOff := row[3]
+		notDayOffStrings := []string{"ne", "ne "}
+		if slices.Contains(notDayOffStrings, isDayOff) {
+			continue
+		}
 
 		year, _ := strconv.Atoi(row[6])
 		month, _ := strconv.Atoi(row[5])
