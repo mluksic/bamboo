@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -23,6 +25,7 @@ var (
 	startDate  string
 	endDate    string
 	employeeId int
+	holidays   map[string]string
 )
 
 const (
@@ -108,6 +111,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	holidays, err = loadHolidays()
+	if err != nil {
+		fmt.Printf("Cannot load holidays: %v . Aborting \n", err)
+		os.Exit(2)
+	}
+
 	workingHours, err := fetchWorkingHours()
 	if err != nil {
 		fmt.Printf("Failed fetching working hours: %v \n", err)
@@ -129,6 +138,49 @@ func main() {
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
 		os.Exit(1)
 	}
+}
+
+func loadHolidays() (map[string]string, error) {
+	var filename = "slovenian_public_work_off_days.csv"
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to open file: %v \n", err))
+	}
+
+	defer file.Close()
+
+	r := csv.NewReader(file)
+	r.Comma = ';'
+
+	// buf read row by row
+	holidays := make(map[string]string)
+
+	// skip header row
+	_, err = r.Read()
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("unable to skip header row: %v \n", err))
+	}
+
+	for {
+		row, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("unable to read row: %v \n", err))
+		}
+
+		year, _ := strconv.Atoi(row[6])
+		month, _ := strconv.Atoi(row[5])
+		day, _ := strconv.Atoi(row[4])
+		holidayName := row[1]
+		date := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local)
+
+		holidays[date.Format("2006-01-02")] = holidayName
+
+	}
+
+	return holidays, nil
 }
 
 func processList(report Report) {
@@ -229,7 +281,13 @@ func generateWorkEntries(report Report) ([]Entry, error) {
 		// exclude days when hours were already logged
 		_, ok := existingHours[s.Format("2006-01-02")]
 		if ok {
-			fmt.Printf("Excluded %s because hours were already logged for this day \n", s.Format("2006-01-2"))
+			fmt.Printf("Excluded '%s' because hours were already logged for this day \n", s.Format("2006-01-2"))
+			continue
+		}
+		// exclude holidays
+		holiday, ok := holidays[s.Format("2006-01-02")]
+		if ok {
+			fmt.Printf("Excluded '%s' because it's public holiday - %s \n", s.Format("2006-01-2"), holiday)
 			continue
 		}
 
