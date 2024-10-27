@@ -21,6 +21,7 @@ import (
 )
 
 var (
+	config       Config
 	apiKey       string
 	startDate    string
 	endDate      string
@@ -36,6 +37,11 @@ const (
 )
 
 var actions = []string{ActionAdd, ActionList}
+
+type Config struct {
+	ApiToken   string `json:"apiToken"`
+	EmployeeId int    `json:"employeeId"`
+}
 
 type TimeEntriesPostBody struct {
 	Entries []Entry `json:"entries"`
@@ -73,8 +79,14 @@ type DayReport struct {
 }
 
 func init() {
-	flag.StringVar(&apiKey, "apiKey", "", "Your BambooHR API key")
-	flag.IntVar(&employeeId, "employeeId", 0, "Your BambooHR employee ID")
+	config, err := loadConfig("config.json")
+	if err != nil {
+		fmt.Println("Unable to load config file. Aborting")
+		os.Exit(1)
+	}
+
+	flag.StringVar(&apiKey, "apiKey", config.ApiToken, "Your BambooHR API key")
+	flag.IntVar(&employeeId, "employeeId", config.EmployeeId, "Your BambooHR employee ID")
 	flag.StringVar(&startDate, "start", "", "Start date filter for tracked working hours")
 	flag.StringVar(&endDate, "end", "", "End date filter for tracked working hours")
 	flag.StringVar(&excludeDays, "excludeDays", "", "Comma-separated list of days (YYYY-MM-DD,YYYY-MM-DD) eg PTO, Collective Leave etc.")
@@ -141,6 +153,21 @@ func main() {
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
 		os.Exit(1)
 	}
+}
+
+func loadConfig(filename string) (Config, error) {
+	var config Config
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		return config, errors.New(fmt.Sprintf("unable to read config file: %v \n", err))
+	}
+
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		return config, errors.New(fmt.Sprintf("unable to unmarshal JSON from config file: %v \n", err))
+	}
+
+	return config, nil
 }
 
 func loadExcludedDays() map[string]bool {
