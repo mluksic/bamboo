@@ -22,8 +22,8 @@ Download and install:
 The application uses a configuration file, `config.json`, which stores default values for your Bamboo `apiToken` and `employeeId`
 ```json
 {
-"apiToken": "yourBambooApiToken",
-"employeeId": 123
+    "apiToken": "yourBambooApiToken",
+    "employeeId": 123
 }
 ```
 
@@ -33,16 +33,16 @@ The application uses a configuration file, `config.json`, which stores default v
 $ go build -o bamboo main.go
 ```
 
-
 ## Running the app
-### `list` command
+
+### `list` command (skip config params if they're stored in `config.json`)
 ```bash
-$ go run . --apiKey myApiToken --employeeId yourEmployeeId  --start 2024-09-01 --end 2024-10-01 list
+$ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 list
 ```
 
-### `add` command
+### `add` command (skip config params if they're stored in `config.json`)
 ```bash
-$ go run . --apiKey myApiToken --employeeId yourEmployeeId  --start 2024-09-01 --end 2024-10-01 --excludeDays 2024-09-15,2024-09-20 add
+$ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 --excludeDays 2024-09-15,2024-09-20 add
 ```
 
 ## Options
@@ -54,8 +54,10 @@ $ go run . --apiKey myApiToken --employeeId yourEmployeeId  --start 2024-09-01 -
 
 ## Example
 Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
+
+(skip config params if they're stored in `config.json`)
 ```bash
-$ go run . --apiKey myApiToken --employeeId 12345 --start 2024-10-01 --end 2024-11-01 --excludeDays 2024-10-28,2024-10-29,2024-10-30
+$ ./bamboo --apiKey yourBambooApiToken --employeeId  --start 2024-10-01 --end 2024-11-01 --excludeDays 2024-10-28,2024-10-29,2024-10-30
 ```
 
 ### Response
