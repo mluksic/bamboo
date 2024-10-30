@@ -14,7 +14,11 @@ type Config struct {
 
 func loadConfig(filename string) (Config, error) {
 	var config Config
-	file, err := os.ReadFile(filename)
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return config, errors.New(fmt.Sprintf("unable to get working dir: %v \n", err))
+	}
+	file, err := os.ReadFile(workingDir + "/" + filename)
 	if err != nil {
 		return config, errors.New(fmt.Sprintf("unable to read config file: %v \n", err))
 	}
