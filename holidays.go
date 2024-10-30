@@ -11,9 +11,22 @@ import (
 	"time"
 )
 
-func loadHolidays() (map[string]string, error) {
-	var filename = "slovenian_public_work_off_days.csv"
-	file, err := os.Open(filename)
+type HolidayFetcher interface {
+	loadHolidays() (map[string]string, error)
+}
+
+type CsvHolidayFetcher struct {
+	filepath string
+}
+
+func NewCsvHolidays(filepath string) *CsvHolidayFetcher {
+	return &CsvHolidayFetcher{
+		filepath: filepath,
+	}
+}
+
+func (h *CsvHolidayFetcher) loadHolidays() (map[string]string, error) {
+	file, err := os.Open(h.filepath)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to open file: %v \n", err))
 	}

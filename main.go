@@ -73,7 +73,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	holidays, err = loadHolidays()
+	holidayFetcher := NewCsvHolidays("slovenian_public_work_off_days.csv")
+	holidays, err = holidayFetcher.loadHolidays()
 	if err != nil {
 		fmt.Printf("Cannot load holidays: %v . Aborting \n", err)
 		os.Exit(2)
