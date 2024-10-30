@@ -33,6 +33,11 @@ chmod +x bamboo_Linux_x64_64    # for Linux
 ./bamboo_Darwin_x86_64 --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
 ```
 
+For Windows, use
+```bash
+./bamboo_Windows_x86_64.exe --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
+```
+
 4. Check 'Example' section below for more info
 
 ## Installation
