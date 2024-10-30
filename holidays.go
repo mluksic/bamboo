@@ -36,11 +36,14 @@ func (h *CsvHolidayFetcher) loadHolidays() (map[string]string, error) {
 	r := csv.NewReader(file)
 	r.Comma = ';'
 
-	// buf read row by row
+	return h.readHolidaysFile(r)
+}
+
+func (h *CsvHolidayFetcher) readHolidaysFile(r *csv.Reader) (map[string]string, error) {
 	holidays := make(map[string]string)
 
 	// skip header row
-	_, err = r.Read()
+	_, err := r.Read()
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to skip header row: %v \n", err))
 	}
@@ -53,10 +56,9 @@ func (h *CsvHolidayFetcher) loadHolidays() (map[string]string, error) {
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("unable to read row: %v \n", err))
 		}
+
 		// exclude 'working' public holidays
-		isDayOff := row[3]
-		notDayOffStrings := []string{"ne", "ne "}
-		if slices.Contains(notDayOffStrings, isDayOff) {
+		if !h.isOffDay(row[3]) {
 			continue
 		}
 
@@ -71,4 +73,14 @@ func (h *CsvHolidayFetcher) loadHolidays() (map[string]string, error) {
 	}
 
 	return holidays, nil
+}
+
+func (h *CsvHolidayFetcher) isOffDay(separator string) bool {
+	dayOffStrings := []string{"da"}
+
+	if slices.Contains(dayOffStrings, separator) {
+		return true
+	}
+
+	return false
 }
