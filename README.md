@@ -9,12 +9,39 @@ CLI tool for automating the generation of daily work hour entries
 - Excludes weekends, public holidays, and specified PTO days.
 - Populates missing work entries on BambooHR
 
-## Prerequisites
+## Getting Started
 
-Download and install:
+### Downloading the Binary
 
-- [Go](https://go.dev/doc/install) (1.23+ recommended)
+Download the appropriate binary for your operating system from the [Releases](https://github.com/mluksic/bamboo/releases) page. Available binaries:
+- __Windows__: bamboo_Windows_x86_64
+- __macOS__: bamboo_Darwin_x86_64 or bamboo_Darwin_arm64 (for Apple Silicon)
+- __Linux__: bamboo_Linux_x86_64
 
+### Running the Binary
+
+1. Download the binary for your operating system
+
+2. Make the binary executable (if on macOS/Linux):
+```bash
+chmod +x bamboo_Darwin_x86_64   # for macOS
+chmod +x bamboo_Linux_x64_64    # for Linux
+```
+
+3. Run the binary from the command line
+```bash
+./bamboo_Darwin_x86_64 --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
+```
+
+4. Check 'Example' section below for more info
+
+## Installation
+
+### via Go
+
+```bash
+$ go install github.com/mluksic/bamboo@latest
+```
 
 ## Configuration
 
@@ -50,7 +77,7 @@ $ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --en
 - `--employeeId`: (**Required**) Employee ID for whom the entries are generated - found in your BambooHR's URL
 - `--start`: (**Required**) Start date in YYYY-MM-DD format
 - `--end`: (**Required**) End date in YYYY-MM-DD format
-- `--excludeDays`: (__Optional__) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
+- `--excludeDays`: (**Optional**) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
 
 ## Example
 ### Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
