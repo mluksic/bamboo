@@ -21,7 +21,6 @@ import (
 )
 
 var (
-	config       Config
 	apiKey       string
 	startDate    string
 	endDate      string
@@ -81,7 +80,7 @@ type DayReport struct {
 func init() {
 	config, err := loadConfig("config.json")
 	if err != nil {
-		fmt.Println("Unable to load config file. Aborting")
+		fmt.Printf("Unable to load config file - %v. Aborting", err)
 		os.Exit(1)
 	}
 
