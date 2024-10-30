@@ -25,7 +25,7 @@ const (
 
 var actions = []string{ActionAdd, ActionList}
 
-func init() {
+func main() {
 	config, err := loadConfig("config.json")
 	if err != nil {
 		fmt.Printf("Unable to load config file - %v. Aborting", err)
@@ -39,9 +39,6 @@ func init() {
 	flag.StringVar(&excludeDays, "excludeDays", "", "Comma-separated list of days (YYYY-MM-DD,YYYY-MM-DD) eg PTO, Collective Leave etc.")
 
 	flag.Parse()
-}
-
-func main() {
 	if apiKey == "" {
 		fmt.Println("Invalid 'apiKey' provided. Aborting")
 		os.Exit(1)

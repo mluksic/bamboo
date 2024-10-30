@@ -19,7 +19,12 @@ func loadConfig(filename string) (Config, error) {
 		return config, errors.New(fmt.Sprintf("unable to read config file: %v \n", err))
 	}
 
-	err = json.Unmarshal(file, &config)
+	return readConfigFile(file)
+}
+
+func readConfigFile(r []byte) (Config, error) {
+	var config Config
+	err := json.Unmarshal(r, &config)
 	if err != nil {
 		return config, errors.New(fmt.Sprintf("unable to unmarshal JSON from config file: %v \n", err))
 	}
