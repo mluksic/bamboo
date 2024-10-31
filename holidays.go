@@ -1,15 +1,18 @@
 package main
 
 import (
+	"embed"
 	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"slices"
 	"strconv"
 	"time"
 )
+
+//go:embed slovenian_public_work_off_days.csv
+var holidayFile embed.FS
 
 type HolidayFetcher interface {
 	loadHolidays() (map[string]string, error)
@@ -26,7 +29,7 @@ func NewCsvHolidays(filepath string) *CsvHolidayFetcher {
 }
 
 func (h *CsvHolidayFetcher) loadHolidays() (map[string]string, error) {
-	file, err := os.Open(h.filepath)
+	file, err := holidayFile.Open(h.filepath)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to open file: %v \n", err))
 	}
