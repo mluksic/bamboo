@@ -1,37 +1,36 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 )
+
+//go:embed config.json
+var configFile embed.FS
 
 type Config struct {
 	ApiToken   string `json:"apiToken"`
 	EmployeeId int    `json:"employeeId"`
 }
 
-func loadConfig(filename string) (Config, error) {
+func loadConfig(filename string) (*Config, error) {
 	var config Config
-	workingDir, err := os.Getwd()
+	file, err := configFile.ReadFile(filename)
 	if err != nil {
-		return config, errors.New(fmt.Sprintf("unable to get working dir: %v \n", err))
-	}
-	file, err := os.ReadFile(workingDir + "/" + filename)
-	if err != nil {
-		return config, errors.New(fmt.Sprintf("unable to read config file: %v \n", err))
+		return &config, errors.New(fmt.Sprintf("unable to read config file: %v \n", err))
 	}
 
 	return readConfigFile(file)
 }
 
-func readConfigFile(r []byte) (Config, error) {
+func readConfigFile(r []byte) (*Config, error) {
 	var config Config
 	err := json.Unmarshal(r, &config)
 	if err != nil {
-		return config, errors.New(fmt.Sprintf("unable to unmarshal JSON from config file: %v \n", err))
+		return &config, errors.New(fmt.Sprintf("unable to unmarshal JSON from config file: %v \n", err))
 	}
 
-	return config, nil
+	return &config, nil
 }
