@@ -22,20 +22,27 @@ Download the appropriate binary for your operating system from the [Releases](ht
 
 1. Download the binary for your operating system
 
-2. Make the binary executable (if on macOS/Linux):
+2. Extract file
 ```bash
-chmod +x bamboo_Darwin_x86_64   # for macOS
-chmod +x bamboo_Linux_x64_64    # for Linux
+tar -xzvf (downloaded_binary)
 ```
 
-3. Run the binary from the command line
+3. Make the binary executable (if on macOS/Linux):
 ```bash
-./bamboo_Darwin_x86_64 --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
+chmod +x bamboo   # for macOS
+chmod +x bamboo   # for Linux
+```
+
+4. Allow app to be opened by external developer in "Privacy & Security" (if on macOS)
+
+4. Run the binary from the command line
+```bash
+./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
 ```
 
 For Windows, use
 ```bash
-./bamboo_Windows_x86_64.exe --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
+./bamboo.exe --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
 ```
 
 4. Check 'Example' section below for more info
