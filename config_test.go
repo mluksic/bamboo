@@ -46,7 +46,7 @@ func TestReadConfigFile(t *testing.T) {
 				t.Errorf(`readConfigFile(bytes) should return an error", got %q`, config)
 				return
 			}
-			if !reflect.DeepEqual(config, test.want) {
+			if !reflect.DeepEqual(*config, test.want) {
 				t.Errorf(`readConfigFile(bytes) should match %v, got %v`, test.want, config)
 			}
 		})
