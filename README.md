@@ -45,7 +45,7 @@ For Windows, use
 ./bamboo.exe --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 add
 ```
 
-4. Check 'Example' section below for more info
+4. Check [Example](#example) section below for more info
 
 ## Installation
 
