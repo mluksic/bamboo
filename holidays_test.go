@@ -16,7 +16,7 @@ func TestReadHolidaysFile(t *testing.T) {
 
 	want := map[string]string{
 		"2024-01-01": "novo leto",
-		"2024-01-02": "novo leto testtest",
+		"2024-01-02": "novo leto test",
 	}
 
 	reader := strings.NewReader(records)
