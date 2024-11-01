@@ -74,9 +74,13 @@ func main() {
 	holidays, err = holidayFetcher.loadHolidays()
 	if err != nil {
 		fmt.Printf("Cannot load holidays: %v . Aborting \n", err)
-		os.Exit(2)
+		os.Exit(1)
 	}
-	excludedDays = loadExcludedDays()
+	excludedDays, err = loadExcludedDays(excludeDays)
+	if err != nil {
+		fmt.Printf("Cannot parse excluded days: %v", err)
+		os.Exit(1)
+	}
 	workingHours, err := fetchWorkingHours()
 	if err != nil {
 		fmt.Printf("Failed fetching working hours: %v \n", err)

@@ -12,7 +12,6 @@ import (
 	"os"
 	"slices"
 	"sort"
-	"strings"
 	"text/tabwriter"
 	"time"
 )
@@ -50,19 +49,6 @@ type Report struct {
 }
 type DayReport struct {
 	workHours float64
-}
-
-func loadExcludedDays() map[string]bool {
-	excludedDays := make(map[string]bool)
-	if excludeDays == "" {
-		return excludedDays
-	}
-	dates := strings.Split(excludeDays, ",")
-	for _, date := range dates {
-		excludedDays[date] = true
-	}
-
-	return excludedDays
 }
 
 func processList(report Report) {

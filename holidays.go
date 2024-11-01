@@ -4,10 +4,11 @@ import (
 	"embed"
 	"encoding/csv"
 	"errors"
-	"fmt"
+	fmt "fmt"
 	"io"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -86,4 +87,24 @@ func (h *CsvHolidayFetcher) isOffDay(separator string) bool {
 	}
 
 	return false
+}
+
+func loadExcludedDays(excludeDays string) (map[string]bool, error) {
+	excludedDays := make(map[string]bool)
+
+	if len(excludeDays) == 0 {
+		return excludedDays, nil
+	}
+
+	lastChar := string(excludeDays[len(excludeDays)-1])
+	if lastChar == "," {
+		return excludedDays, errors.New(fmt.Sprint("'excludeDays' should not contain spaces \n"))
+	}
+
+	dates := strings.Split(excludeDays, ",")
+	for _, date := range dates {
+		excludedDays[date] = true
+	}
+
+	return excludedDays, nil
 }
