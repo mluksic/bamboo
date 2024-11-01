@@ -57,3 +57,45 @@ func TestMalformedHolidaysFile(t *testing.T) {
 		t.Errorf("readHolidaysFile() = '%v' should return error", got)
 	}
 }
+
+func TestLoadExcludedDays(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    string
+		want    map[string]bool
+		wantErr bool
+	}{
+		{
+			"ValidOneDay",
+			"2024-01-01",
+			map[string]bool{"2024-01-01": true},
+			false,
+		},
+		{
+			"ValidDays",
+			"2024-01-01,2024-01-02",
+			map[string]bool{"2024-01-01": true, "2024-01-02": true},
+			false,
+		},
+		{
+			"InvalidDays",
+			"2024-01-01,",
+			map[string]bool{},
+			true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := loadExcludedDays(test.args)
+
+			if (err != nil) != test.wantErr {
+				t.Errorf(`loadExcludedDays(%s) = %q, should return an error`, test.args, err)
+				return
+			}
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf(`loadExcludedDays(%s) should match %v, got %v`, test.args, test.want, got)
+			}
+		})
+	}
+}
