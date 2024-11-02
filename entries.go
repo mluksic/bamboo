@@ -79,7 +79,7 @@ func addWorkingHours(report Report) {
 	var storeHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/clock_entries/store"
 	url := fmt.Sprintf(storeHoursUrlTemplate, apiKey)
 
-	entries, err := generateWorkEntries(report)
+	entries, err := generateWorkEntries(report, startDate, endDate)
 	if err != nil {
 		fmt.Printf("Unable to create post request entries: %v", err)
 		os.Exit(1)
@@ -147,7 +147,7 @@ func fetchWorkingHours() ([]TimeEntry, error) {
 	return workingHours, nil
 }
 
-func generateWorkEntries(report Report) ([]Entry, error) {
+func generateWorkEntries(report Report, startDate string, endDate string) ([]Entry, error) {
 	start, err := time.Parse("2006-01-02", startDate)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("unable to parse start date: %v \n", err))
