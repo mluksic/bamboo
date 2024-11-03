@@ -87,6 +87,10 @@ func addWorkingHours(report Report) {
 		os.Exit(1)
 	}
 
+	if len(entries) == 0 {
+		fmt.Println("There are no generated entries for specified dates. Exiting the program...")
+		os.Exit(0)
+	}
 	isConfirmed, err := askForConfirmation(entries)
 	if !isConfirmed {
 		fmt.Printf("Exiting the program... \n")
