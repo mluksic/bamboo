@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"slices"
 	"sort"
+	"strings"
 	"text/tabwriter"
 	"time"
 )
@@ -84,6 +86,14 @@ func addWorkingHours(report Report) {
 		fmt.Printf("Unable to create post request entries: %v", err)
 		os.Exit(1)
 	}
+
+	isConfirmed, err := askForConfirmation(entries)
+	if !isConfirmed {
+		fmt.Printf("Exiting the program... \n")
+		os.Exit(0)
+	}
+
+	fmt.Println("Pushing hours to BambooHR. Please wait...")
 
 	body, _ := json.Marshal(TimeEntriesPostBody{Entries: entries})
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
@@ -260,4 +270,31 @@ func convertDecimalTimeToTime(decimalTime float64) string {
 	minutes := int(math.Round((decimalTime - float64(hours)) * 60))
 
 	return fmt.Sprintf("%d hours and %d minutes", hours, minutes)
+}
+
+func askForConfirmation(entries []Entry) (bool, error) {
+	r := bufio.NewReader(os.Stdin)
+	msg := "\nGenerated work entries: \n\n"
+	for _, entry := range entries {
+		msg += fmt.Sprintf("Date: %s ; Start date: %s ; End date: %s \n", entry.Date, entry.Start, entry.End)
+	}
+
+	for {
+		fmt.Printf("%s\nAre you sure you want to populate your work hours with the generated entries listed above? [y/n] ", msg)
+
+		resp, err := r.ReadString('\n')
+		if err != nil {
+			return false, errors.New(fmt.Sprintf("unable to read string from user: %v", err))
+		}
+
+		resp = strings.ToLower(strings.TrimSpace(resp))
+		switch resp {
+		case "y", "yes":
+			return true, nil
+		case "n", "no":
+			return false, nil
+		}
+
+		fmt.Println("You selected invalid option, retrying... Press Ctrl+c to exit")
+	}
 }
