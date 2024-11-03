@@ -92,6 +92,10 @@ func addWorkingHours(report Report) {
 		os.Exit(0)
 	}
 	isConfirmed, err := askForConfirmation(entries)
+	if err != nil {
+		fmt.Printf("There was an issue asking for confirmation: %v", err)
+		os.Exit(1)
+	}
 	if !isConfirmed {
 		fmt.Printf("Exiting the program... \n")
 		os.Exit(0)
