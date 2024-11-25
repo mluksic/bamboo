@@ -52,6 +52,16 @@ type Report struct {
 type DayReport struct {
 	workHours float64
 }
+type YearReport struct {
+	month map[string]MonthReport
+}
+type MonthReport struct {
+	workDays          int
+	holidays          int
+	workHours         int
+	totalHolidayHours int
+	totalHours        int
+}
 
 func processList(report Report) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
@@ -249,6 +259,54 @@ func generateWorkEntries(report Report, startDate string, endDate string) ([]Ent
 	}
 
 	return entries, nil
+}
+
+func processRequiredHours() YearReport {
+	dateMap := make(map[string]MonthReport)
+	year := 2024
+
+	for month := time.January; month <= time.December; month++ {
+		totalDays := 0
+		totalHolidays := 0
+		monthStr := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
+
+		for day := 1; day <= daysInMonth(month, year); day++ {
+			date := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+
+			weekend := []time.Weekday{time.Saturday, time.Sunday}
+			// skip weekends
+			if slices.Contains(weekend, date.Weekday()) {
+				continue
+			}
+			// skip public holidays
+			if _, ok := holidays[date.Format("2006-01-02")]; ok {
+				totalHolidays += 1
+			}
+
+			totalDays += 1
+		}
+
+		dateMap[monthStr.Format("2006-01")] = MonthReport{
+			workDays:          totalDays - totalHolidays,
+			holidays:          totalHolidays,
+			workHours:         (totalDays - totalHolidays) * 8,
+			totalHolidayHours: totalHolidays * 8,
+			totalHours:        totalDays * 8,
+		}
+
+	}
+
+	report := YearReport{month: dateMap}
+	fmt.Println(report)
+
+	return report
+}
+
+func daysInMonth(month time.Month, year int) int {
+	firstDayNextMonth := time.Date(year, month+1, 1, 0, 0, 0, 0, time.UTC)
+	lastDayCurrMonth := firstDayNextMonth.AddDate(0, 0, -1)
+
+	return lastDayCurrMonth.Day()
 }
 
 func groupHoursByDate(workingHours []TimeEntry) Report {

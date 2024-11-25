@@ -19,11 +19,12 @@ var (
 )
 
 const (
-	ActionList = "list"
-	ActionAdd  = "add"
+	ActionList     = "list"
+	ActionAdd      = "add"
+	ActionRequired = "required"
 )
 
-var actions = []string{ActionAdd, ActionList}
+var actions = []string{ActionAdd, ActionList, ActionRequired}
 
 func main() {
 	config, err := loadConfig("config.json")
@@ -97,6 +98,9 @@ func main() {
 		os.Exit(0)
 	case ActionAdd:
 		addWorkingHours(report)
+		os.Exit(0)
+	case ActionRequired:
+		processRequiredHours()
 		os.Exit(0)
 	default:
 		fmt.Printf("No argument provided. You need to choose one of the supported actions: %s \n", strings.Join(actions, ", "))
