@@ -263,7 +263,6 @@ func generateWorkEntries(report Report, startDate string, endDate string) ([]Ent
 
 func processRequiredHours() YearReport {
 	dateMap := make(map[string]MonthReport)
-	year := 2024
 
 	for month := time.January; month <= time.December; month++ {
 		totalDays := 0
@@ -297,7 +296,6 @@ func processRequiredHours() YearReport {
 	}
 
 	report := YearReport{month: dateMap}
-	fmt.Println(report)
 
 	return report
 }
