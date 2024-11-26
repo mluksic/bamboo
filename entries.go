@@ -65,6 +65,7 @@ type MonthReport struct {
 
 func processList(report Report) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
+	defer w.Flush()
 	// table header
 	fmt.Fprintf(w, "Date\tWeekday\tTotal\t\n")
 
