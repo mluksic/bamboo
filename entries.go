@@ -309,8 +309,13 @@ func processRequiredHours() {
 	}
 	sort.Strings(months)
 
-	for _, date := range months {
-		fmt.Fprintf(w, "%s\t%d\t%dh\t%d\t%dh\t%dh\n", date, report.month[date].workDays, report.month[date].workHours, report.month[date].holidays, report.month[date].totalHolidayHours, report.month[date].totalHours)
+	for _, month := range months {
+		monthDate, err := time.Parse("2006-01", month)
+		if err != nil {
+			fmt.Printf("Unable to prase date to month: %v \n", err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(w, "%s\t%d days\t%dh\t%d days\t%dh\t%dh\n", monthDate.Format("2006 January"), report.month[month].workDays, report.month[month].workHours, report.month[month].holidays, report.month[month].totalHolidayHours, report.month[month].totalHours)
 	}
 }
 
