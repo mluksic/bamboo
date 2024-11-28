@@ -3,6 +3,7 @@ package main
 import (
 	"slices"
 	"testing"
+	"time"
 )
 
 func TestGenerateWorkEntries(t *testing.T) {
@@ -52,6 +53,62 @@ func TestGenerateWorkEntries(t *testing.T) {
 				if _, ok := test.args.report.days[entry.Date]; ok {
 					t.Errorf("generateWorkEntries() should not include entries for already populated date %s", entry.Date)
 				}
+			}
+		})
+	}
+}
+
+func TestDaysInMonth(t *testing.T) {
+	type args struct {
+		month time.Month
+		year  int
+	}
+
+	tests := []struct {
+		name  string
+		input args
+		want  int
+	}{
+		{
+			"DaysInFeb2024",
+			args{
+				time.February,
+				2024,
+			},
+			29,
+		},
+		{
+			"DaysInMarch2024",
+			args{
+				time.March,
+				2024,
+			},
+			31,
+		},
+		{
+			"DaysInMarch2024",
+			args{
+				time.March,
+				2024,
+			},
+			31,
+		},
+		{
+			"DaysInFeb2025",
+			args{
+				time.February,
+				2025,
+			},
+			28,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := daysInMonth(test.input.month, test.input.year)
+
+			if got != test.want {
+				t.Errorf("daysInMonth() = got = %d ; want = %d", got, test.want)
 			}
 		})
 	}
