@@ -263,6 +263,31 @@ func generateWorkEntries(report Report, startDate string, endDate string) ([]Ent
 }
 
 func processRequiredHours() {
+	report := getRequiredHours(year)
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
+	defer w.Flush()
+	// table header
+	fmt.Fprintf(w, "Month\tWork Days\tWork Hours\tHolidays\tHoliday Hours\tTotal\t\n")
+
+	// sort months in asc order because map sorting order is random
+	months := make([]string, 0, len(report.month))
+	for month := range report.month {
+		months = append(months, month)
+	}
+	sort.Strings(months)
+
+	for _, month := range months {
+		monthDate, err := time.Parse("2006-01", month)
+		if err != nil {
+			fmt.Printf("Unable to prase date to month: %v \n", err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(w, "%s\t%d days\t%dh\t%d days\t%dh\t%dh\n", monthDate.Format("2006 January"), report.month[month].workDays, report.month[month].workHours, report.month[month].holidays, report.month[month].totalHolidayHours, report.month[month].totalHours)
+	}
+}
+
+func getRequiredHours(year int) YearReport {
 	dateMap := make(map[string]MonthReport)
 
 	for month := time.January; month <= time.December; month++ {
@@ -293,30 +318,9 @@ func processRequiredHours() {
 			totalHolidayHours: totalHolidays * 8,
 			totalHours:        totalDays * 8,
 		}
-
 	}
 
-	report := YearReport{month: dateMap}
-	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
-	defer w.Flush()
-	// table header
-	fmt.Fprintf(w, "Month\tWork Days\tWork Hours\tHolidays\tHoliday Hours\tTotal\t\n")
-
-	// sort months in asc order because map sorting order is random
-	months := make([]string, 0, len(report.month))
-	for month := range report.month {
-		months = append(months, month)
-	}
-	sort.Strings(months)
-
-	for _, month := range months {
-		monthDate, err := time.Parse("2006-01", month)
-		if err != nil {
-			fmt.Printf("Unable to prase date to month: %v \n", err)
-			os.Exit(1)
-		}
-		fmt.Fprintf(w, "%s\t%d days\t%dh\t%d days\t%dh\t%dh\n", monthDate.Format("2006 January"), report.month[month].workDays, report.month[month].workHours, report.month[month].holidays, report.month[month].totalHolidayHours, report.month[month].totalHours)
-	}
+	return YearReport{month: dateMap}
 }
 
 func daysInMonth(month time.Month, year int) int {
