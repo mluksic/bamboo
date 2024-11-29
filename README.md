@@ -87,12 +87,18 @@ $ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --en
 $ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 --excludeDays 2024-09-15,2024-09-20 add
 ```
 
+### `required` command
+```bash
+$ ./bamboo --year 2024 required
+```
+
 ## Options
 - `--apiKey` (**Required**) API token for BambooHR authentication
 - `--employeeId`: (**Required**) Employee ID for whom the entries are generated - found in your BambooHR's URL
 - `--start`: (**Required**) Start date in YYYY-MM-DD format
 - `--end`: (**Required**) End date in YYYY-MM-DD format
 - `--excludeDays`: (**Optional**) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
+- `--year`: (**Optional**) For fetching required hours for selected year
 
 ## Example
 ### Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
