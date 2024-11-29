@@ -263,12 +263,12 @@ func generateWorkEntries(report Report, startDate string, endDate string) ([]Ent
 }
 
 func processRequiredHours() {
-	report := getRequiredHours(year)
+	report := getRequiredHours(year, holidays)
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
 	defer w.Flush()
 	// table header
-	fmt.Fprintf(w, "Month\tWork Days\tWork Hours\tHolidays\tHoliday Hours\tTotal\t\n")
+	fmt.Fprintf(w, "month\tWork Days\tWork Hours\tHolidays\tHoliday Hours\tTotal\t\n")
 
 	// sort months in asc order because map sorting order is random
 	months := make([]string, 0, len(report.month))
@@ -287,7 +287,7 @@ func processRequiredHours() {
 	}
 }
 
-func getRequiredHours(year int) YearReport {
+func getRequiredHours(year int, holidays map[string]string) YearReport {
 	dateMap := make(map[string]MonthReport)
 
 	for month := time.January; month <= time.December; month++ {

@@ -3,6 +3,7 @@ package main
 import (
 	"reflect"
 	"slices"
+	"sort"
 	"testing"
 	"time"
 )
@@ -116,47 +117,52 @@ func TestDaysInMonth(t *testing.T) {
 }
 
 func TestGetRequiredHours(t *testing.T) {
+	type args struct {
+		year     int
+		holidays map[string]string
+	}
+
 	tests := []struct {
-		name string
-		year int
-		want YearReport
+		name  string
+		input args
+		want  YearReport
 	}{
 		{
 			"Year2024Feb",
-			2024,
+			args{2024, map[string]string{"2024-02-08": "Prešernov dan"}},
 			YearReport{
-				month: map[string]MonthReport{"2024-02": {
-					workDays:          20,
-					holidays:          1,
-					workHours:         160,
-					totalHolidayHours: 8,
-					totalHours:        168,
+				map[string]MonthReport{"2024-02": {
+					20,
+					1,
+					160,
+					8,
+					168,
 				}},
 			},
 		},
 		{
 			"Year2024Dec",
-			2024,
+			args{2024, map[string]string{"2024-12-25": "božič", "2024-12-26": "dan samostojnosti"}},
 			YearReport{
-				month: map[string]MonthReport{"2024-12": {
-					workDays:          20,
-					holidays:          2,
-					workHours:         160,
-					totalHolidayHours: 16,
-					totalHours:        176,
+				map[string]MonthReport{"2024-12": {
+					20,
+					2,
+					160,
+					16,
+					176,
 				}},
 			},
 		},
 		{
 			"Year2025Feb",
-			2025,
+			args{2025, map[string]string{"2025-02-08": "Prešernov dan"}},
 			YearReport{
-				month: map[string]MonthReport{"2025-02": {
-					workDays:          20,
-					holidays:          0,
-					workHours:         160,
-					totalHolidayHours: 0,
-					totalHours:        160,
+				map[string]MonthReport{"2025-02": {
+					20,
+					0,
+					160,
+					0,
+					160,
 				}},
 			},
 		},
@@ -164,17 +170,16 @@ func TestGetRequiredHours(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := getRequiredHours(test.year)
+			got := getRequiredHours(test.input.year, test.input.holidays)
 
 			if len(got.month) < len(test.want.month) {
-				t.Errorf("getRequiredHours() should generate entries for all months in year %d, got = %d", test.year, len(got.month))
+				t.Errorf("getRequiredHours() should generate entries for all months in year %d, got = %d", test.input.year, len(got.month))
 			}
 
-			months := getMonthsInMap(got.month)
-
+			months := getMonthsInMap(test.want.month)
 			month, ok := got.month[months[0]]
 			if !ok {
-				t.Errorf("getRequiredHours() should have month %s in map %s", months[0], months[0])
+				t.Errorf("getRequiredHours() should have month %s in map %v", months[0], got.month)
 			}
 			if !reflect.DeepEqual(test.want.month[months[0]], month) {
 				t.Errorf("getRequiredHours() want = %v ; got = %v", test.want.month[months[0]], month)
@@ -191,5 +196,6 @@ func getMonthsInMap(monthsMap map[string]MonthReport) []string {
 		months = append(months, month)
 	}
 
+	sort.Strings(months)
 	return months
 }
