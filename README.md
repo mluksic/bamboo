@@ -87,12 +87,18 @@ $ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --en
 $ ./bamboo --apiKey yourBambooApiToken --employeeId 123  --start 2024-09-01 --end 2024-10-01 --excludeDays 2024-09-15,2024-09-20 add
 ```
 
+### `required` command
+```bash
+$ ./bamboo --year 2024 required
+```
+
 ## Options
 - `--apiKey` (**Required**) API token for BambooHR authentication
 - `--employeeId`: (**Required**) Employee ID for whom the entries are generated - found in your BambooHR's URL
 - `--start`: (**Required**) Start date in YYYY-MM-DD format
 - `--end`: (**Required**) End date in YYYY-MM-DD format
 - `--excludeDays`: (**Optional**) Comma-separated list of PTO dates in YYYY-MM-DD format. These dates will be excluded from work hour entries
+- `--year`: (**Optional**) For fetching required hours for selected year
 
 ## Example
 ### Generate work entries for October 2024, excluding October 28th, 29th and October 30th for PTO, October 31st is public holiday
@@ -125,7 +131,30 @@ Excluded '2024-10-31' because it's public holiday - dan reformacije
 Successfully populated working hour entries between two dates
 ```
 
-### Show work hours for September 2024, using `list` command
+### Show required hours for specific year eg. 2024
+
+```bash
+$ ./bamboo --year 2024
+```
+
+#### Response
+```bash
+Month              Work Days     Work Hours     Holidays     Holiday Hours     Total
+2024 January       21 days       168h           2 days       16h               184h
+2024 February      20 days       160h           1 days       8h                168h
+2024 March         21 days       168h           0 days       0h                168h
+2024 April         21 days       168h           1 days       8h                176h
+2024 May           21 days       168h           2 days       16h               184h
+2024 June          19 days       152h           1 days       8h                160h
+2024 July          23 days       184h           0 days       0h                184h
+2024 August        21 days       168h           1 days       8h                176h
+2024 September     21 days       168h           0 days       0h                168h
+2024 October       22 days       176h           1 days       8h                184h
+2024 November      20 days       160h           1 days       8h                168h
+2024 December      20 days       160h           2 days       16h               176h
+```
+
+### Show your work hours for September 2024, using `list` command
 
 (skip config params if they're stored in `config.json`)
 ```bash

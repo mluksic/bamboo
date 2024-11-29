@@ -268,7 +268,7 @@ func processRequiredHours() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 5, 5, ' ', 0)
 	defer w.Flush()
 	// table header
-	fmt.Fprintf(w, "month\tWork Days\tWork Hours\tHolidays\tHoliday Hours\tTotal\t\n")
+	fmt.Fprintf(w, "Month\tWork Days\tWork Hours\tHolidays\tHoliday Hours\tTotal\t\n")
 
 	// sort months in asc order because map sorting order is random
 	months := make([]string, 0, len(report.month))
