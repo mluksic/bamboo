@@ -59,11 +59,11 @@ func main() {
 			fmt.Println("Invalid 'employeeId' provided. Aborting")
 			os.Exit(1)
 		}
-		if action != ActionRequired && startDate == "" {
+		if startDate == "" {
 			fmt.Println("Invalid 'start' date filter provided. Aborting")
 			os.Exit(1)
 		}
-		if action != ActionRequired && endDate == "" {
+		if endDate == "" {
 			fmt.Println("Invalid 'end' date filter provided. Aborting")
 			os.Exit(1)
 		}
