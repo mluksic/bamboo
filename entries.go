@@ -143,7 +143,7 @@ func addWorkingHours(report Report) {
 		os.Exit(1)
 	}
 
-	fmt.Println("Successfully populated working hour entries between two dates")
+	fmt.Println("Successfully populated working hour entries between two dates. Please double-check in Bamboo")
 }
 
 func fetchWorkingHours() ([]TimeEntry, error) {
