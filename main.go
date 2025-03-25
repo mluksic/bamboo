@@ -17,6 +17,7 @@ var (
 	employeeId   int
 	holidays     map[string]string
 	excludedDays map[string]bool
+	force        bool
 )
 
 const (
@@ -40,6 +41,7 @@ func main() {
 	flag.StringVar(&endDate, "end", "", "End date filter for tracked working hours")
 	flag.IntVar(&year, "year", 0, "Year for fetching required hours")
 	flag.StringVar(&excludeDays, "excludeDays", "", "Comma-separated list of days (YYYY-MM-DD,YYYY-MM-DD) eg PTO, Collective Leave etc.")
+	flag.BoolVar(&force, "force", false, "Populate work hours without confirmation")
 
 	flag.Parse()
 	action := flag.Arg(0)
@@ -108,7 +110,7 @@ func main() {
 		processList(report)
 		os.Exit(0)
 	case ActionAdd:
-		addWorkingHours(report)
+		addWorkingHours(report, force)
 		os.Exit(0)
 	case ActionRequired:
 		processRequiredHours()

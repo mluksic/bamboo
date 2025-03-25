@@ -88,7 +88,7 @@ func processList(report Report) {
 	fmt.Fprintf(w, "\nYour total working hours: %s \n", convertDecimalTimeToTime(report.totalWorkHours))
 }
 
-func addWorkingHours(report Report) {
+func addWorkingHours(report Report, force bool) {
 	var storeHoursUrlTemplate = "https://%s:x@api.bamboohr.com/api/gateway.php/flaviar/v1/time_tracking/clock_entries/store"
 	url := fmt.Sprintf(storeHoursUrlTemplate, apiKey)
 
@@ -102,7 +102,7 @@ func addWorkingHours(report Report) {
 		fmt.Println("There are no generated entries for specified dates. Exiting the program...")
 		os.Exit(0)
 	}
-	isConfirmed, err := askForConfirmation(entries)
+	isConfirmed, err := askForConfirmation(entries, force)
 	if err != nil {
 		fmt.Printf("There was an issue asking for confirmation: %v", err)
 		os.Exit(1)
@@ -359,11 +359,16 @@ func convertDecimalTimeToTime(decimalTime float64) string {
 	return fmt.Sprintf("%d hours and %d minutes", hours, minutes)
 }
 
-func askForConfirmation(entries []Entry) (bool, error) {
+func askForConfirmation(entries []Entry, force bool) (bool, error) {
 	r := bufio.NewReader(os.Stdin)
 	msg := "\nGenerated work entries: \n\n"
 	for _, entry := range entries {
 		msg += fmt.Sprintf("Date: %s ; Start date: %s ; End date: %s \n", entry.Date, entry.Start, entry.End)
+	}
+
+	if force {
+		fmt.Printf("%s\nPopulating your work hours without confirmation \n", msg)
+		return true, nil
 	}
 
 	for {
